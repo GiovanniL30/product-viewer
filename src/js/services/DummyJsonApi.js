@@ -2,11 +2,13 @@ import { ApiClient } from "./ApiClient.js";
 
 export class DummyJsonApi extends ApiClient {
   constructor() {
-    super("https://dummyjson.com");
+    super("https://fakestoreapi.com");
   }
 
-  getProducts() {
-    return this.get("/products");
+  getProducts(params = {}) {
+    const query = new URLSearchParams(params).toString();
+
+    return this.get(`/products?${query}`);
   }
 
   getProduct(id) {
