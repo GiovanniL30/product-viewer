@@ -1,0 +1,107 @@
+:root {
+  /* Brand */
+  --color-primary: #087ea4;
+  --color-primary-hover: #066a8b;
+  --color-primary-light: #e8f6fa;
+
+  /* Backgrounds */
+  --color-background: #f2f7f9;
+  --color-surface: #f8fbfc;
+  --color-card: #ffffff;
+
+  /* Typography */
+  --color-text-primary: #123b4a;
+  --color-text: #263238;
+  --color-text-secondary: #52656d;
+  --color-muted: #82929a;
+
+  /* Borders */
+  --color-border: #d8e5e9;
+  --color-divider: #e8eff2;
+
+  /* Status */
+  --color-success: #168a70;
+  --color-success-light: #e8f6f2;
+
+  --color-warning: #d99118;
+  --color-warning-light: #fff6e3;
+
+  --color-error: #d9534f;
+  --color-error-light: #fdeeed;
+
+  --color-info: #287fb8;
+  --color-info-light: #eaf4fb;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+  color: var(--color-text);
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  margin: 0;
+}
