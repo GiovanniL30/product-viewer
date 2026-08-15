@@ -15,6 +15,8 @@ export class Router {
   }
 
   load() {
+    this.container.replaceChildren();
+
     const path = window.location.hash.slice(1) || "/";
 
     const PageClass = this.routes[path];

@@ -1,4 +1,7 @@
 @import "./global.css";
+
+@import "./styles/productspage.css";
+@import "./styles/loginpage.css";
 @import "./styles/header.css";
 @import "./components.css";
 @import "./utilities.css";

@@ -2,7 +2,7 @@ import { ApiClient } from "./ApiClient.js";
 
 export class DummyJsonApi extends ApiClient {
   constructor() {
-    super("https://fakestoreapi.com");
+    super("https://dummyjson.com");
   }
 
   getProducts(params = {}) {

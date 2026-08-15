@@ -13,3 +13,7 @@
   background: paleturquoise;
   border-radius: 100%;
 }
+
+.app-header {
+  height: 50px;
+}

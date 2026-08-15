@@ -1,32 +1,51 @@
+import { Input } from "../components/Input.js";
+import { Button } from "../components/Button.js";
 import { Page } from "./Page.js";
 
 export class LoginPage extends Page {
-  render() {
-    const container = this.#createContainer();
-    const card = this.#createCard();
+  usernameInput;
+  passwordInput;
+  loginButton;
+  errorElement;
 
-    card.append(this.#createHeader(), this.#createForm());
+  render() {
+    const loginContainer = this.createLogInContainer();
+
+    const container = this.createContainer();
+    const card = this.createCard();
+
+    card.append(this.createHeader(), this.createForm());
 
     container.append(card);
-    this.container.append(container);
+
+    loginContainer.append(container);
+
+    this.container.append(loginContainer);
   }
 
-  #createContainer() {
-    const element = document.createElement("div");
-    element.classList.add("container-sm");
+  createLogInContainer() {
+    const container = document.createElement("div");
+    container.classList.add("login-page-container");
 
-    return element;
+    return container;
   }
 
-  #createCard() {
-    const element = document.createElement("div");
+  createContainer() {
+    const container = document.createElement("div");
+    container.classList.add("container-sm");
 
-    element.classList.add("bg-white", "p-24", "rounded-lg");
-
-    return element;
+    return container;
   }
 
-  #createHeader() {
+  createCard() {
+    const card = document.createElement("div");
+
+    card.classList.add("bg-white", "p-24", "rounded-lg");
+
+    return card;
+  }
+
+  createHeader() {
     const container = document.createElement("div");
 
     container.classList.add("flex", "flex-col", "gap-4", "mb-24");
@@ -48,85 +67,79 @@ export class LoginPage extends Page {
     return container;
   }
 
-  #createForm() {
+  createForm() {
     const form = document.createElement("form");
-
-    form.id = "login-form";
 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
 
-      this.#handleLogin();
+      this.handleLogin();
     });
 
     const fields = document.createElement("div");
 
     fields.classList.add("flex", "flex-col", "gap-20");
 
-    fields.append(
-      this.#createUsernameField(),
-      this.#createPasswordField(),
-      this.#createSubmitButton(),
-      this.#createError(),
-    );
+    fields.append(this.createUsernameField(), this.createPasswordField(), this.createSubmitButton(), this.createError());
 
     form.append(fields);
 
     return form;
   }
 
-  #createUsernameField() {
-    const container = this.#createFieldContainer();
+  createUsernameField() {
+    const container = this.createFieldContainer();
 
-    const label = this.#createLabel("username", "Username");
+    const label = this.createLabel("Username");
 
-    const input = document.createElement("input");
+    this.usernameInput = new Input({
+      type: "text",
+      name: "username",
+      id: "username",
+      placeholder: "Enter your username",
+      autocomplete: "username",
+      required: true,
+    });
 
-    input.id = "username";
-    input.name = "username";
-    input.type = "text";
-    input.classList.add("input");
-    input.placeholder = "Enter your username";
-    input.autocomplete = "username";
-    input.required = true;
+    label.htmlFor = this.usernameInput.element.id;
 
-    container.append(label, input);
-
-    return container;
-  }
-
-  #createPasswordField() {
-    const container = this.#createFieldContainer();
-
-    const label = this.#createLabel("password", "Password");
-
-    const input = document.createElement("input");
-
-    input.id = "password";
-    input.name = "password";
-    input.type = "password";
-    input.classList.add("input");
-    input.placeholder = "Enter your password";
-    input.autocomplete = "current-password";
-    input.required = true;
-
-    container.append(label, input);
+    container.append(label, this.usernameInput.element);
 
     return container;
   }
 
-  #createFieldContainer() {
-    const element = document.createElement("div");
+  createPasswordField() {
+    const container = this.createFieldContainer();
 
-    element.classList.add("flex", "flex-col", "gap-4");
+    const label = this.createLabel("Password");
 
-    return element;
+    this.passwordInput = new Input({
+      type: "password",
+      name: "password",
+      id: "password",
+      placeholder: "Enter your password",
+      autocomplete: "current-password",
+      required: true,
+    });
+
+    label.htmlFor = this.passwordInput.element.id;
+
+    container.append(label, this.passwordInput.element);
+
+    return container;
   }
 
-  #createLabel(forId, text) {
+  createFieldContainer() {
+    const container = document.createElement("div");
+
+    container.classList.add("flex", "flex-col", "gap-4");
+
+    return container;
+  }
+
+  createLabel(text) {
     const label = document.createElement("label");
 
-    label.htmlFor = forId;
     label.classList.add("font-bold", "text-sm");
 
     label.textContent = text;
@@ -134,57 +147,64 @@ export class LoginPage extends Page {
     return label;
   }
 
-  #createSubmitButton() {
-    const button = document.createElement("button");
+  createSubmitButton() {
+    this.loginButton = new Button({
+      text: "Login",
+      type: "submit",
+      variant: "primary",
+    });
 
-    button.type = "submit";
-    button.classList.add("btn", "btn-primary");
-
-    button.textContent = "Login";
-
-    return button;
+    return this.loginButton.element;
   }
 
-  #createError() {
-    const element = document.createElement("p");
+  createError() {
+    this.errorElement = document.createElement("p");
 
-    element.id = "login-error";
+    this.errorElement.classList.add("text-sm", "text-danger", "hidden");
 
-    element.classList.add("text-sm", "text-danger", "hidden");
-
-    return element;
+    return this.errorElement;
   }
 
-  #handleLogin() {
-    const username = this.container.querySelector("#username").value.trim();
+  handleLogin() {
+    const username = this.usernameInput.value.trim();
+    const password = this.passwordInput.value;
 
-    const password = this.container.querySelector("#password").value;
+    this.clearError();
 
-    if (!username || !password) {
-      this.#showError("Username and password are required.");
+    if (!username) {
+      this.showError("Username is required.");
+
+      this.usernameInput.focus();
 
       return;
     }
 
-    this.#clearError();
+    if (!password) {
+      this.showError("Password is required.");
+
+      this.passwordInput.focus();
+
+      return;
+    }
 
     console.log({
       username,
       password,
     });
+
+    // TODO:
+    // Authentication service
   }
 
-  #showError(message) {
-    const error = this.container.querySelector("#login-error");
+  showError(message) {
+    this.errorElement.textContent = message;
 
-    error.textContent = message;
-    error.classList.remove("hidden");
+    this.errorElement.classList.remove("hidden");
   }
 
-  #clearError() {
-    const error = this.container.querySelector("#login-error");
+  clearError() {
+    this.errorElement.textContent = "";
 
-    error.textContent = "";
-    error.classList.add("hidden");
+    this.errorElement.classList.add("hidden");
   }
 }
