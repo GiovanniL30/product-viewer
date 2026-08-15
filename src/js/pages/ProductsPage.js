@@ -2,6 +2,7 @@ import { DummyJsonApi } from "../services/DummyJsonApi.js";
 import { Button } from "../components/Button.js";
 import { Page } from "./Page.js";
 import { Icon } from "../components/Icon.js";
+import { Input } from "../components/Input.js";
 
 export class ProductsPage extends Page {
   api = new DummyJsonApi();
@@ -21,7 +22,7 @@ export class ProductsPage extends Page {
 
     container.append(this.createHeader(), this.createContent());
 
-    this.container.append(container);
+    this.container.append(container, this.createModal());
 
     this.loadProducts();
   }
@@ -35,14 +36,39 @@ export class ProductsPage extends Page {
 
   createHeader() {
     const container = document.createElement("div");
-    container.classList.add("flex", "items-center", "justify-between");
+    container.classList.add("flex", "items-center", "justify-between", "products-header");
+
     const title = this.createTitle();
 
-    this.viewToggleContainer = this.createViewToggle();
+    const actions = document.createElement("div");
+    actions.classList.add("flex", "items-center", "gap-12");
 
-    container.append(title, this.viewToggleContainer);
+    actions.append(this.createAddButton(), this.createViewToggle());
+
+    container.append(title, actions);
 
     return container;
+  }
+
+  createAddButton() {
+    this.addButton = new Button({
+      text: "Add Product",
+      type: "button",
+      variant: "primary",
+    });
+
+    const icon = new Icon({
+      src: "src/assets/icons/add.svg",
+      alt: "Add product",
+      width: 16,
+      height: 16,
+    });
+
+    this.addButton.element.prepend(icon.element);
+
+    this.addButton.onClick(() => this.openModal());
+
+    return this.addButton.element;
   }
 
   createTitle() {
@@ -130,6 +156,7 @@ export class ProductsPage extends Page {
       const response = await this.api.getProducts({
         limit: this.pageSize,
         skip,
+        select: "id,title,description,category,price,discountPercentage,rating,stock,thumbnail",
       });
 
       this.total = response.total;
@@ -143,7 +170,6 @@ export class ProductsPage extends Page {
       }
     } catch (error) {
       console.error(error);
-
       this.renderError("Failed to load products.");
     } finally {
       this.setLoading(false);
@@ -151,9 +177,12 @@ export class ProductsPage extends Page {
   }
 
   renderTable(products) {
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("table-scroll");
+
     const table = document.createElement("table");
 
-    table.classList.add("table");
+    table.classList.add("products-table");
 
     const thead = this.createTableHeader();
 
@@ -161,7 +190,9 @@ export class ProductsPage extends Page {
 
     table.append(thead, tbody);
 
-    this.tableContainer.replaceChildren(table);
+    wrapper.append(table);
+
+    this.tableContainer.replaceChildren(wrapper);
   }
 
   createTableHeader() {
@@ -169,13 +200,11 @@ export class ProductsPage extends Page {
 
     const row = document.createElement("tr");
 
-    const headers = ["ID", "Product", "Price"];
+    const headers = ["Product", "Price", "Stock", "Actions"];
 
     headers.forEach((text) => {
       const th = document.createElement("th");
-
       th.textContent = text;
-
       row.append(th);
     });
 
@@ -189,7 +218,6 @@ export class ProductsPage extends Page {
 
     products.forEach((product) => {
       const row = this.createProductRow(product);
-
       tbody.append(row);
     });
 
@@ -199,21 +227,351 @@ export class ProductsPage extends Page {
   createProductRow(product) {
     const row = document.createElement("tr");
 
-    const id = document.createElement("td");
-
-    id.textContent = product.id;
-
-    const title = document.createElement("td");
-
-    title.textContent = product.title;
-
-    const price = document.createElement("td");
-
-    price.textContent = `$${product.price}`;
-
-    row.append(id, title, price);
+    row.append(this.createProductCell(product), this.createPriceCell(product), this.createStockCell(product), this.createActionsCell(product));
 
     return row;
+  }
+
+  createProductCell(product) {
+    const td = document.createElement("td");
+
+    const container = document.createElement("div");
+    container.classList.add("product-col");
+
+    const image = document.createElement("img");
+    image.classList.add("product-image");
+    image.src = product.thumbnail;
+    image.alt = product.title;
+
+    const text = document.createElement("div");
+    text.classList.add("product-col-text");
+
+    const name = document.createElement("p");
+    name.classList.add("product-name");
+    name.textContent = product.title;
+
+    const category = document.createElement("span");
+    category.classList.add("product-category");
+    category.textContent = product.category;
+
+    text.append(name, category);
+    container.append(image, text);
+    td.append(container);
+
+    return td;
+  }
+
+  getDiscountedPrice(product) {
+    const discount = product.discountPercentage || 0;
+    return (product.price * (1 - discount / 100)).toFixed(2);
+  }
+
+  hasDiscount(product) {
+    return (product.discountPercentage || 0) > 0;
+  }
+
+  createPriceCell(product) {
+    const td = document.createElement("td");
+    td.classList.add("price-cell");
+
+    const container = document.createElement("div");
+
+    const current = document.createElement("span");
+    current.classList.add("price-discounted");
+    current.textContent = `$${this.getDiscountedPrice(product)}`;
+    container.append(current);
+
+    if (this.hasDiscount(product)) {
+      const original = document.createElement("span");
+      original.classList.add("price-original");
+      original.textContent = `$${product.price}`;
+      container.append(original);
+
+      const badge = document.createElement("span");
+      badge.classList.add("discount-badge");
+      badge.textContent = `-${Math.round(product.discountPercentage)}%`;
+      container.append(badge);
+    }
+
+    td.append(container);
+    return td;
+  }
+
+  createStockCell(product) {
+    const td = document.createElement("td");
+
+    const stock = document.createElement("span");
+    stock.classList.add("stock-badge");
+    stock.textContent = product.stock;
+    if (product.stock <= 5) {
+      stock.classList.add("stock-low");
+    }
+
+    td.append(stock);
+
+    return td;
+  }
+
+  createActionsCell(product) {
+    const td = document.createElement("td");
+    td.classList.add("actions-cell");
+
+    td.append(
+      this.createActionButton("src/assets/icons/view.svg", `View ${product.id}`, "View product", {
+        onClick: () => this.viewProduct(product.id),
+      }),
+    );
+
+    return td;
+  }
+
+  createActionButton(iconSrc, label, alt, { destructive = false, onClick } = {}) {
+    const button = new Button({
+      type: "button",
+      variant: "icon",
+    });
+
+    button.addClass("action-btn");
+
+    if (destructive) {
+      button.addClass("action-btn-danger");
+    } else {
+      button.addClass("action-btn-neutral");
+    }
+
+    const icon = new Icon({
+      src: iconSrc,
+      alt,
+    });
+
+    button.append(icon);
+
+    button.onClick(() => {
+      if (onClick) {
+        onClick();
+      } else {
+        console.log(label);
+      }
+    });
+
+    return button.element;
+  }
+
+  viewProduct(id) {
+    window.location.hash = `/product/${id}`;
+  }
+
+  createModal() {
+    const overlay = document.createElement("div");
+    overlay.classList.add("modal-overlay");
+    this.modalOverlay = overlay;
+
+    const modal = document.createElement("div");
+    modal.classList.add("modal");
+
+    const header = document.createElement("div");
+    header.classList.add("modal-header");
+
+    const title = document.createElement("h2");
+    title.classList.add("modal-title");
+    title.textContent = "Add Product";
+
+    const close = new Button({ text: "×", type: "button", variant: "icon" });
+    close.addClass("modal-close");
+    close.onClick(() => this.closeModal());
+
+    header.append(title, close.element);
+
+    const form = document.createElement("form");
+    form.classList.add("modal-body");
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      this.handleCreateProduct();
+    });
+
+    this.modalError = document.createElement("p");
+    this.modalError.classList.add("text-sm", "text-danger", "hidden");
+
+    const fieldsContainer = document.createElement("div");
+    fieldsContainer.classList.add("flex", "flex-col", "gap-16");
+
+    this.createModalFields().forEach((field) => {
+      fieldsContainer.append(this.createModalField(field));
+    });
+
+    const footer = document.createElement("div");
+    footer.classList.add("modal-footer");
+
+    const cancel = new Button({ text: "Cancel", type: "button", variant: "secondary" });
+    cancel.onClick(() => this.closeModal());
+
+    this.modalSaveButton = new Button({ text: "Save", type: "submit", variant: "primary" });
+
+    footer.append(cancel.element, this.modalSaveButton.element);
+
+    form.append(fieldsContainer, this.modalError, footer);
+    modal.append(header, form);
+    overlay.append(modal);
+
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        this.closeModal();
+      }
+    });
+
+    return overlay;
+  }
+
+  createModalFields() {
+    const title = new Input({
+      name: "title",
+      placeholder: "Enter product title",
+      required: true,
+    });
+
+    const description = this.createTextArea("Enter a short product description");
+
+    const category = new Input({
+      name: "category",
+      placeholder: "e.g. beauty",
+      required: true,
+    });
+
+    const price = new Input({
+      type: "number",
+      name: "price",
+      min: "0",
+      step: "0.01",
+      placeholder: "0.00",
+      required: true,
+    });
+
+    const discountPercentage = new Input({
+      type: "number",
+      name: "discountPercentage",
+      min: "0",
+      max: "100",
+      step: "0.01",
+      placeholder: "0",
+    });
+
+    const stock = new Input({
+      type: "number",
+      name: "stock",
+      min: "0",
+      step: "1",
+      placeholder: "0",
+    });
+
+    this.modalInputs = {
+      title: title.element,
+      description,
+      category: category.element,
+      price: price.element,
+      discountPercentage: discountPercentage.element,
+      stock: stock.element,
+    };
+
+    return [
+      { label: "Title", element: title.element },
+      { label: "Description", element: description },
+      { label: "Category", element: category.element },
+      { label: "Price", element: price.element },
+      { label: "Discount %", element: discountPercentage.element },
+      { label: "Stock", element: stock.element },
+    ];
+  }
+
+  createTextArea(placeholder) {
+    const textarea = document.createElement("textarea");
+
+    textarea.classList.add("input");
+    textarea.name = "description";
+    textarea.rows = 3;
+    textarea.placeholder = placeholder;
+
+    return textarea;
+  }
+
+  createModalField({ label: labelText, element }) {
+    const container = document.createElement("div");
+
+    container.classList.add("flex", "flex-col", "gap-4");
+
+    const label = document.createElement("label");
+
+    label.classList.add("font-bold", "text-sm");
+    label.textContent = labelText;
+
+    container.append(label, element);
+
+    return container;
+  }
+
+  openModal() {
+    this.clearModalError();
+    this.modalOverlay?.classList.add("open");
+  }
+
+  closeModal() {
+    this.modalOverlay?.classList.remove("open");
+  }
+
+  async handleCreateProduct() {
+    this.clearModalError();
+
+    const payload = {
+      title: this.modalInputs.title.value.trim(),
+      description: this.modalInputs.description.value.trim(),
+      category: this.modalInputs.category.value.trim().toLowerCase(),
+      price: Number(this.modalInputs.price.value),
+      discountPercentage: Number(this.modalInputs.discountPercentage.value) || 0,
+      stock: Number(this.modalInputs.stock.value) || 0,
+    };
+
+    if (!payload.title) {
+      this.showModalError("Title is required.");
+      return;
+    }
+
+    if (!Number.isFinite(payload.price) || payload.price <= 0) {
+      this.showModalError("Price must be greater than 0.");
+      return;
+    }
+
+    this.modalSaveButton.disabled = true;
+
+    try {
+      await this.api.createProduct(payload);
+
+      this.closeModal();
+      this.resetModalForm();
+
+      this.currentPage = 1;
+
+      this.loadProducts();
+    } catch (error) {
+      console.error(error);
+      this.showModalError("Failed to create product.");
+      this.modalSaveButton.disabled = false;
+    }
+  }
+
+  resetModalForm() {
+    Object.values(this.modalInputs).forEach((input) => {
+      input.value = "";
+    });
+  }
+
+  showModalError(message) {
+    this.modalError.textContent = message;
+    this.modalError.classList.remove("hidden");
+  }
+
+  clearModalError() {
+    this.modalError.textContent = "";
+    this.modalError.classList.add("hidden");
   }
 
   renderTablePagination() {
@@ -269,7 +627,7 @@ export class ProductsPage extends Page {
   renderCards(products) {
     const grid = document.createElement("div");
 
-    grid.classList.add("grid", "grid-cols-3", "gap-20");
+    grid.classList.add("products-grid");
 
     products.forEach((product) => {
       const card = this.createProductCard(product);
@@ -282,28 +640,64 @@ export class ProductsPage extends Page {
 
   createProductCard(product) {
     const card = document.createElement("div");
+    card.classList.add("product-card");
 
-    card.classList.add("bg-white", "p-20", "rounded-lg");
+    const imageWrap = document.createElement("div");
+    imageWrap.classList.add("product-card-image");
+
+    const image = document.createElement("img");
+    image.src = product.thumbnail;
+    image.alt = product.title;
+    imageWrap.append(image);
+
+    if (this.hasDiscount(product)) {
+      const badge = document.createElement("span");
+      badge.classList.add("discount-badge");
+      badge.textContent = `-${Math.round(product.discountPercentage)}%`;
+      imageWrap.append(badge);
+    }
+
+    const body = document.createElement("div");
+    body.classList.add("product-card-body");
+
+    const category = document.createElement("span");
+    category.classList.add("product-category");
+    category.textContent = product.category;
 
     const title = document.createElement("h3");
-
     title.textContent = product.title;
 
-    title.classList.add("font-bold", "text-lg");
+    const rating = document.createElement("div");
+    rating.classList.add("product-rating");
+    const star = document.createElement("span");
+    star.textContent = "★";
+    const ratingValue = document.createElement("span");
+    ratingValue.textContent = product.rating;
+    rating.append(star, ratingValue);
 
-    const id = document.createElement("p");
+    const description = document.createElement("p");
+    description.classList.add("product-description");
+    description.textContent = product.description;
 
-    id.textContent = `ID: ${product.id}`;
+    const priceRow = document.createElement("div");
+    priceRow.classList.add("price-row");
 
-    id.classList.add("text-muted", "text-sm");
+    const current = document.createElement("span");
+    current.classList.add("price-discounted");
+    current.textContent = `$${this.getDiscountedPrice(product)}`;
+    priceRow.append(current);
 
-    const price = document.createElement("p");
+    if (this.hasDiscount(product)) {
+      const original = document.createElement("span");
+      original.classList.add("price-original");
+      original.textContent = `$${product.price}`;
+      priceRow.append(original);
+    }
 
-    price.textContent = `$${product.price}`;
+    body.append(category, title, rating, description, priceRow);
+    card.append(imageWrap, body);
 
-    price.classList.add("font-bold", "text-primary");
-
-    card.append(title, id, price);
+    card.addEventListener("click", () => this.viewProduct(product.id));
 
     return card;
   }

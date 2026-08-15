@@ -1,0 +1,209 @@
+/* =========================
+   Products table
+   ========================= */
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  background: var(--color-card);
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+
+  font-size: 14px;
+}
+
+.products-table th,
+.products-table td {
+  padding: 14px 16px;
+
+  text-align: left;
+
+  vertical-align: middle;
+}
+
+.products-table thead th {
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  letter-spacing: 0.04em;
+}
+
+.products-table tbody tr {
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.products-table tbody tr:hover {
+  background: var(--color-primary-light);
+}
+
+.products-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.products-table th:last-child,
+.products-table td:last-child {
+  text-align: right;
+}
+
+/* =========================
+   Product cell
+   ========================= */
+
+.product-col {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-width: 0;
+}
+
+.product-image {
+  width: 48px;
+  height: 48px;
+
+  flex-shrink: 0;
+
+  object-fit: cover;
+
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.product-col-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  min-width: 0;
+}
+
+.product-name {
+  color: var(--color-text-primary);
+  font-weight: 500;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-category {
+  color: var(--color-muted);
+
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+/* =========================
+   Price
+   ========================= */
+
+.price-cell div {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  justify-items: center;
+  white-space: nowrap;
+}
+
+.price-discounted {
+  color: var(--color-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.price-original {
+  color: var(--color-muted);
+  font-size: 12px;
+  text-decoration: line-through;
+}
+
+.discount-badge {
+  display: inline-block;
+
+  padding: 2px 8px;
+
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+
+  border-radius: 9999px;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* =========================
+   Stock
+   ========================= */
+
+.stock-badge {
+  display: inline-block;
+
+  padding: 3px 10px;
+
+  background: var(--color-success-light);
+  color: var(--color-success);
+
+  border-radius: 9999px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.stock-badge.stock-low {
+  background: var(--color-error-light);
+  color: var(--color-error);
+}
+
+/* =========================
+   Actions
+   ========================= */
+
+.actions-cell {
+  white-space: nowrap;
+}
+
+.actions-cell .action-btn {
+  margin-left: 8px;
+}
+
+.action-btn {
+  width: 34px;
+  height: 34px;
+
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+
+  border: 1px solid var(--color-border);
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.action-btn img,
+.action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.action-btn:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.action-btn-danger:hover {
+  background: var(--color-error-light);
+  border-color: var(--color-error);
+  color: var(--color-error);
+}

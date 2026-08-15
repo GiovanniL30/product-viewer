@@ -1,8 +1,11 @@
 import { Input } from "../components/Input.js";
 import { Button } from "../components/Button.js";
 import { Page } from "./Page.js";
+import { AuthService } from "../services/AuthService.js";
 
 export class LoginPage extends Page {
+  authService = new AuthService();
+
   usernameInput;
   passwordInput;
   loginButton;
@@ -80,7 +83,13 @@ export class LoginPage extends Page {
 
     fields.classList.add("flex", "flex-col", "gap-20");
 
-    fields.append(this.createUsernameField(), this.createPasswordField(), this.createSubmitButton(), this.createError());
+    fields.append(
+      this.createUsernameField(),
+      this.createPasswordField(),
+      this.createSubmitButton(),
+      this.createError(),
+      this.createRegisterLink(),
+    );
 
     form.append(fields);
 
@@ -165,6 +174,32 @@ export class LoginPage extends Page {
     return this.errorElement;
   }
 
+  createRegisterLink() {
+    const container = document.createElement("div");
+
+    container.classList.add("text-center");
+
+    const paragraph = document.createElement("p");
+
+    paragraph.classList.add("text-sm", "text-muted");
+
+    paragraph.textContent = "Don't have an account? ";
+
+    const link = document.createElement("a");
+
+    link.textContent = "Register";
+
+    link.href = "#/register";
+
+    link.classList.add("font-bold", "text-primary");
+
+    paragraph.append(link);
+
+    container.append(paragraph);
+
+    return container;
+  }
+
   handleLogin() {
     const username = this.usernameInput.value.trim();
     const password = this.passwordInput.value;
@@ -187,13 +222,20 @@ export class LoginPage extends Page {
       return;
     }
 
-    console.log({
-      username,
-      password,
-    });
+    const result = this.authService.login(username, password);
 
-    // TODO:
-    // Authentication service
+    if (result.error) {
+      this.showError(result.error);
+
+      this.passwordInput.clear();
+      this.passwordInput.focus();
+
+      return;
+    }
+
+    window.dispatchEvent(new CustomEvent("auth:change"));
+
+    window.location.hash = "/products";
   }
 
   showError(message) {

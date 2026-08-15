@@ -1,7 +1,12 @@
 @import "./global.css";
 
-@import "./styles/productspage.css";
-@import "./styles/loginpage.css";
+@import "./styles/layout.css";
 @import "./styles/header.css";
+@import "./styles/auth.css";
+@import "./styles/products-table.css";
+@import "./styles/products-card.css";
+@import "./styles/products-grid.css";
+@import "./styles/modal.css";
+@import "./styles/product-detail.css";
 @import "./components.css";
 @import "./utilities.css";

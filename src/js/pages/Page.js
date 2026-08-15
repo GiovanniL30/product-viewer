@@ -1,6 +1,7 @@
 export class Page {
-  constructor(container) {
+  constructor(container, options = {}) {
     this.container = container;
+    this.options = options;
   }
 
   render() {

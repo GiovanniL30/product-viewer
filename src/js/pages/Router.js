@@ -19,16 +19,45 @@ export class Router {
 
     const path = window.location.hash.slice(1) || "/";
 
-    const PageClass = this.routes[path];
+    const { PageClass, params } = this.matchRoute(path);
 
     if (!PageClass) {
       this.render404();
       return;
     }
 
-    const page = new PageClass(this.container);
+    const page = new PageClass(this.container, { params });
 
     page.render();
+  }
+
+  matchRoute(path) {
+    const segments = path.split("/").filter(Boolean);
+
+    for (const [pattern, PageClass] of Object.entries(this.routes)) {
+      const keys = pattern.split("/").filter(Boolean);
+
+      if (keys.length !== segments.length) {
+        continue;
+      }
+
+      const params = {};
+      let matched = true;
+
+      keys.forEach((key, index) => {
+        if (key.startsWith(":")) {
+          params[key.slice(1)] = decodeURIComponent(segments[index]);
+        } else if (key !== segments[index]) {
+          matched = false;
+        }
+      });
+
+      if (matched) {
+        return { PageClass, params };
+      }
+    }
+
+    return { PageClass: null, params: {} };
   }
 
   render404() {
