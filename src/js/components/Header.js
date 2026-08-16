@@ -41,11 +41,11 @@ export class Header {
 
     const avatar = document.createElement("div");
     avatar.classList.add("header-avatar");
-    avatar.textContent = this.getInitials(currentUser.name);
+    avatar.textContent = this.getInitials(currentUser.username);
 
-    const name = document.createElement("p");
-    name.classList.add("font-bold", "text-sm", "header-user-name");
-    name.textContent = currentUser.name;
+    const username = document.createElement("p");
+    username.classList.add("font-bold", "text-sm", "header-user-name");
+    username.textContent = currentUser.username;
 
     const logout = new Button({
       text: "Logout",
@@ -57,7 +57,7 @@ export class Header {
 
     logout.onClick(() => this.handleLogout());
 
-    wrapper.append(avatar, name, logout.element);
+    wrapper.append(avatar, username, logout.element);
 
     return wrapper;
   }

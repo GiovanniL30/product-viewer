@@ -6,7 +6,6 @@ import { AuthService } from "../services/AuthService.js";
 export class RegisterPage extends Page {
   authService = new AuthService();
 
-  nameInput;
   usernameInput;
   passwordInput;
   confirmPasswordInput;
@@ -88,7 +87,6 @@ export class RegisterPage extends Page {
     fields.classList.add("flex", "flex-col", "gap-20");
 
     fields.append(
-      this.createNameField(),
       this.createUsernameField(),
       this.createPasswordField(),
       this.createConfirmPasswordField(),
@@ -100,27 +98,6 @@ export class RegisterPage extends Page {
     form.append(fields);
 
     return form;
-  }
-
-  createNameField() {
-    const container = this.createFieldContainer();
-
-    const label = this.createLabel("Full Name");
-
-    this.nameInput = new Input({
-      type: "text",
-      name: "name",
-      id: "name",
-      placeholder: "Enter your full name",
-      autocomplete: "name",
-      required: true,
-    });
-
-    label.htmlFor = this.nameInput.element.id;
-
-    container.append(label, this.nameInput.element);
-
-    return container;
   }
 
   createUsernameField() {
@@ -249,20 +226,11 @@ export class RegisterPage extends Page {
   }
 
   handleRegister() {
-    const name = this.nameInput.value.trim();
     const username = this.usernameInput.value.trim();
     const password = this.passwordInput.value;
     const confirmPassword = this.confirmPasswordInput.value;
 
     this.clearError();
-
-    if (!name) {
-      this.showError("Full name is required.");
-
-      this.nameInput.focus();
-
-      return;
-    }
 
     if (!username) {
       this.showError("Username is required.");
@@ -289,7 +257,7 @@ export class RegisterPage extends Page {
       return;
     }
 
-    const result = this.authService.register({ name, username, password });
+    const result = this.authService.register({ username, password });
 
     if (result.error) {
       this.showError(result.error);

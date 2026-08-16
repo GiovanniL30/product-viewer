@@ -6,7 +6,7 @@ export class AuthService {
     return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
   }
 
-  register({ name, username, password }) {
+  register({ username, password }) {
     const users = this.getUsers();
 
     const exists = users.some((user) => user.username === username);
@@ -15,7 +15,7 @@ export class AuthService {
       return { error: "Username is already taken." };
     }
 
-    const user = { name, username, password };
+    const user = { username, password };
 
     users.push(user);
 

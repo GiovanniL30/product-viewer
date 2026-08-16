@@ -47,7 +47,7 @@ export class HomePage extends Page {
 
     title.classList.add("text-2xl", "font-bold", "text-primary");
 
-    title.textContent = `Welcome back, ${currentUser.name}!`;
+    title.textContent = `Welcome back, ${currentUser.username}!`;
 
     const description = document.createElement("p");
 
