@@ -15,7 +15,11 @@ export class ApiClient {
     });
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      const error = new Error(`API Error: ${response.status} ${response.statusText}`);
+
+      error.status = response.status;
+
+      throw error;
     }
 
     return this.parseResponse(response);

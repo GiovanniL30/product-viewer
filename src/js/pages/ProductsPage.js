@@ -7,6 +7,8 @@ import { Input } from "../components/Input.js";
 export class ProductsPage extends Page {
   api = new DummyJsonApi();
 
+  localProducts = [];
+
   currentPage = 1;
   pageSize = 10;
   total = 0;
@@ -159,13 +161,17 @@ export class ProductsPage extends Page {
         select: "id,title,description,category,price,discountPercentage,rating,stock,thumbnail",
       });
 
-      this.total = response.total;
+      const localProducts = this.currentPage === 1 ? this.localProducts : [];
+
+      this.total = response.total + localProducts.length;
+
+      const products = [...localProducts, ...response.products];
 
       if (this.viewMode === "table") {
-        this.renderTable(response.products);
+        this.renderTable(products);
         this.renderTablePagination();
       } else {
-        this.renderCards(response.products);
+        this.renderCards(products);
         this.renderLoadMore();
       }
     } catch (error) {
@@ -543,7 +549,12 @@ export class ProductsPage extends Page {
     this.modalSaveButton.disabled = true;
 
     try {
-      await this.api.createProduct(payload);
+      this.localProducts.unshift({
+        id: `local-${Date.now()}`,
+        ...payload,
+        thumbnail: this.api.createImageUrl(payload.title),
+        rating: 0,
+      });
 
       this.closeModal();
       this.resetModalForm();
@@ -551,6 +562,8 @@ export class ProductsPage extends Page {
       this.currentPage = 1;
 
       this.loadProducts();
+
+      this.modalSaveButton.disabled = false;
     } catch (error) {
       console.error(error);
       this.showModalError("Failed to create product.");

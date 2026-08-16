@@ -48,7 +48,10 @@ export class ProductDetailPage extends Page {
       this.content.replaceChildren(this.createDetail(product));
     } catch (error) {
       console.error(error);
-      this.content.replaceChildren(this.createError("Failed to load product."));
+
+      const message = error.status === 404 ? "Product not found." : "Failed to load product.";
+
+      this.content.replaceChildren(this.createError(message));
     }
   }
 
