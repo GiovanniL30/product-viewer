@@ -40,7 +40,7 @@ export class ProductsPage extends Page {
         this.localProducts.unshift({
           id: `local-${Date.now()}`,
           ...payload,
-          thumbnail: this.api.createImageUrl(payload.title),
+          thumbnail: "https://demofree.sirv.com/nope-not/here.jpg",
           rating: 0,
         });
 
@@ -182,7 +182,7 @@ export class ProductsPage extends Page {
       const response = await this.api.getProducts({
         limit: this.pageSize,
         skip,
-        select: "id,title,description,category,price,discountPercentage,rating,stock,thumbnail",
+        select: "id,title,description,brand,price,discountPercentage,rating,stock,thumbnail",
       });
 
       const localProducts = this.currentPage === 1 ? this.localProducts : [];

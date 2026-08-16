@@ -26,13 +26,48 @@ export class Header {
     logo.src = "./src/assets/svi_logo.png";
     logo.alt = "svi logo";
 
+    logo.addEventListener("click", () => {
+      window.location.hash = "/";
+    });
+
     content.append(logo);
 
     if (currentUser) {
       content.append(this.createUserMenu(currentUser));
+    } else {
+      content.append(this.createAuthActions());
     }
 
     this.container.append(content);
+  }
+
+  createAuthActions() {
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("flex", "items-center", "gap-12");
+
+    const login = new Button({
+      text: "Login",
+      type: "button",
+      variant: "primary",
+    });
+
+    login.onClick(() => {
+      window.location.hash = "/login";
+    });
+
+    const register = new Button({
+      text: "Register",
+      type: "button",
+      variant: "secondary",
+    });
+
+    register.onClick(() => {
+      window.location.hash = "/register";
+    });
+
+    wrapper.append(login.element, register.element);
+
+    return wrapper;
   }
 
   createUserMenu(currentUser) {

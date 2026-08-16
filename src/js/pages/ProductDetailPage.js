@@ -94,10 +94,6 @@ export class ProductDetailPage extends Page {
     const info = document.createElement("div");
     info.classList.add("product-detail-info");
 
-    const category = document.createElement("span");
-    category.classList.add("product-category");
-    category.textContent = product.category;
-
     const title = document.createElement("h1");
     title.classList.add("product-title");
     title.textContent = product.title;
@@ -133,7 +129,6 @@ export class ProductDetailPage extends Page {
 
     meta.append(
       this.createDetailMeta("Brand", product.brand || "Unknown"),
-      this.createDetailMeta("Category", product.category),
       this.createDetailMeta("Stock", product.stock),
       this.createDetailMeta("Rating", `${product.rating} / 5`),
     );
@@ -142,7 +137,7 @@ export class ProductDetailPage extends Page {
     description.classList.add("product-detail-description");
     description.textContent = product.description;
 
-    info.append(category, title, rating, priceRow, meta, description);
+    info.append(title, rating, priceRow, meta, description);
     card.append(imageWrap, info);
 
     return card;

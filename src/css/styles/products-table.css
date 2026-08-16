@@ -94,10 +94,11 @@
   text-overflow: ellipsis;
 }
 
-.product-category {
-  color: var(--color-muted);
+.product-brand {
+  color: var(--color-text-secondary);
 
   font-size: 12px;
+  font-weight: 500;
   text-transform: capitalize;
 }
 

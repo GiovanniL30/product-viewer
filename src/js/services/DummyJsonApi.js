@@ -19,18 +19,6 @@ export class DummyJsonApi extends ApiClient {
     return this.post("/products/add", product);
   }
 
-  createImageUrl(text, { width = 300, height = 300 } = {}) {
-    const size = width === height ? width : `${width}x${height}`;
-
-    const params = new URLSearchParams({
-      text,
-      fontFamily: "poppins",
-      fontSize: 24,
-    });
-
-    return `https://dummyjson.com/image/${size}/da5047/ffffff?${params}`;
-  }
-
   updateProduct(id, product) {
     return this.put(`/products/${id}`, product);
   }

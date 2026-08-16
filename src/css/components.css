@@ -37,6 +37,21 @@
   border: 1px solid var(--color-border);
 }
 
+.btn-text {
+  padding: 0;
+
+  background: none;
+  border: 0;
+
+  color: var(--color-primary);
+
+  font-weight: 500;
+}
+
+.btn-text:hover {
+  opacity: 0.8;
+}
+
 .btn-icon {
   display: inline-flex;
   align-items: center;

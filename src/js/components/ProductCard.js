@@ -30,12 +30,16 @@ export class ProductCard {
     const body = document.createElement("div");
     body.classList.add("product-card-body");
 
-    const category = document.createElement("span");
-    category.classList.add("product-category");
-    category.textContent = this.product.category;
-
     const title = document.createElement("h3");
     title.textContent = this.product.title;
+
+    let brand = null;
+
+    if (this.product.brand) {
+      brand = document.createElement("span");
+      brand.classList.add("product-brand");
+      brand.textContent = this.product.brand;
+    }
 
     const rating = document.createElement("div");
     rating.classList.add("product-rating");
@@ -64,7 +68,15 @@ export class ProductCard {
       priceRow.append(original);
     }
 
-    body.append(category, title, rating, description, priceRow);
+    const bodyElements = [];
+
+    if (brand) {
+      bodyElements.push(brand);
+    }
+
+    bodyElements.push(title, rating, description, priceRow);
+
+    body.append(...bodyElements);
     card.append(imageWrap, body);
 
     card.addEventListener("click", () => this.onClick?.());

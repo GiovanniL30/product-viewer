@@ -78,13 +78,15 @@ export class ProductTable {
     name.classList.add("product-name");
     name.textContent = product.title;
 
-    const category = document.createElement("span");
-    category.classList.add("product-category");
-    category.textContent = product.category;
-
-    text.append(name, category);
+    text.append(name);
     container.append(image, text);
     td.append(container);
+
+    const brand = document.createElement("span");
+    brand.classList.add("product-brand");
+    brand.textContent = product.brand;
+
+    text.append(brand);
 
     return td;
   }

@@ -86,9 +86,9 @@ export class AddProductModal {
 
     const description = this.createTextArea("Enter a short product description");
 
-    const category = new Input({
-      name: "category",
-      placeholder: "e.g. beauty",
+    const brand = new Input({
+      name: "brand",
+      placeholder: "e.g. Apple",
       required: true,
     });
 
@@ -121,7 +121,7 @@ export class AddProductModal {
     this.inputs = {
       title: title.element,
       description,
-      category: category.element,
+      brand: brand.element,
       price: price.element,
       discountPercentage: discountPercentage.element,
       stock: stock.element,
@@ -130,7 +130,7 @@ export class AddProductModal {
     return [
       { label: "Title", element: title.element },
       { label: "Description", element: description },
-      { label: "Category", element: category.element },
+      { label: "Brand", element: brand.element },
       { label: "Price", element: price.element },
       { label: "Discount %", element: discountPercentage.element },
       { label: "Stock", element: stock.element },
@@ -178,7 +178,7 @@ export class AddProductModal {
     const payload = {
       title: this.inputs.title.value.trim(),
       description: this.inputs.description.value.trim(),
-      category: this.inputs.category.value.trim().toLowerCase(),
+      brand: this.inputs.brand.value.trim(),
       price: Number(this.inputs.price.value),
       discountPercentage: Number(this.inputs.discountPercentage.value) || 0,
       stock: Number(this.inputs.stock.value) || 0,
