@@ -39,10 +39,6 @@ export class Header {
     const wrapper = document.createElement("div");
     wrapper.classList.add("header-user");
 
-    const avatar = document.createElement("div");
-    avatar.classList.add("header-avatar");
-    avatar.textContent = this.getInitials(currentUser.username);
-
     const username = document.createElement("p");
     username.classList.add("font-bold", "text-sm", "header-user-name");
     username.textContent = currentUser.username;
@@ -57,7 +53,7 @@ export class Header {
 
     logout.onClick(() => this.handleLogout());
 
-    wrapper.append(avatar, username, logout.element);
+    wrapper.append(username, logout.element);
 
     return wrapper;
   }

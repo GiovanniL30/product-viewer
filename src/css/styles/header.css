@@ -20,23 +20,6 @@
   gap: 12px;
 }
 
-.header-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 34px;
-  height: 34px;
-
-  background: var(--color-primary);
-  color: white;
-
-  border-radius: 50%;
-
-  font-size: 13px;
-  font-weight: 700;
-}
-
 .header-user-name {
   color: var(--color-text-primary);
 

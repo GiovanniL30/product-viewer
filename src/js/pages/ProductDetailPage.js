@@ -1,6 +1,7 @@
 import { Page } from "./Page.js";
 import { Button } from "../components/Button.js";
 import { DummyJsonApi } from "../services/DummyJsonApi.js";
+import { getDiscountedPrice, hasDiscount } from "../utils/productPrice.js";
 
 export class ProductDetailPage extends Page {
   api = new DummyJsonApi();
@@ -71,15 +72,6 @@ export class ProductDetailPage extends Page {
     return error;
   }
 
-  getDiscountedPrice(product) {
-    const discount = product.discountPercentage || 0;
-    return (product.price * (1 - discount / 100)).toFixed(2);
-  }
-
-  hasDiscount(product) {
-    return (product.discountPercentage || 0) > 0;
-  }
-
   createDetail(product) {
     const card = document.createElement("div");
     card.classList.add("product-detail");
@@ -92,7 +84,7 @@ export class ProductDetailPage extends Page {
     image.alt = product.title;
     imageWrap.append(image);
 
-    if (this.hasDiscount(product)) {
+    if (hasDiscount(product)) {
       const badge = document.createElement("span");
       badge.classList.add("discount-badge");
       badge.textContent = `-${Math.round(product.discountPercentage)}%`;
@@ -126,10 +118,10 @@ export class ProductDetailPage extends Page {
 
     const current = document.createElement("span");
     current.classList.add("price-discounted");
-    current.textContent = `$${this.getDiscountedPrice(product)}`;
+    current.textContent = `$${getDiscountedPrice(product)}`;
     priceRow.append(current);
 
-    if (this.hasDiscount(product)) {
+    if (hasDiscount(product)) {
       const original = document.createElement("span");
       original.classList.add("price-original");
       original.textContent = `$${product.price}`;
