@@ -7,7 +7,9 @@ export class AddProductModal {
 
     this.inputs = {};
     this.error;
+    this.title;
     this.saveButton;
+    this.editingProduct = null;
 
     this.overlay = this.createModal();
   }
@@ -26,15 +28,15 @@ export class AddProductModal {
     const header = document.createElement("div");
     header.classList.add("modal-header");
 
-    const title = document.createElement("h2");
-    title.classList.add("modal-title");
-    title.textContent = "Add Product";
+    this.title = document.createElement("h2");
+    this.title.classList.add("modal-title");
+    this.title.textContent = "Add Product";
 
     const close = new Button({ text: "×", type: "button", variant: "icon" });
     close.addClass("modal-close");
     close.onClick(() => this.close());
 
-    header.append(title, close.element);
+    header.append(this.title, close.element);
 
     const form = document.createElement("form");
     form.classList.add("modal-body");
@@ -96,8 +98,8 @@ export class AddProductModal {
       type: "number",
       name: "price",
       min: "0",
-      step: "0.01",
-      placeholder: "0.00",
+      step: "any",
+      placeholder: "0",
       required: true,
     });
 
@@ -106,7 +108,7 @@ export class AddProductModal {
       name: "discountPercentage",
       min: "0",
       max: "100",
-      step: "0.01",
+      step: "any",
       placeholder: "0",
     });
 
@@ -163,13 +165,35 @@ export class AddProductModal {
     return container;
   }
 
-  open() {
+  open(product = null) {
+    this.editingProduct = product;
+
+    if (product) {
+      this.title.textContent = "Edit Product";
+      this.saveButton.text = "Save Changes";
+      this.fillForm(product);
+    } else {
+      this.title.textContent = "Add Product";
+      this.saveButton.text = "Save";
+      this.resetForm();
+    }
+
     this.clearError();
     this.overlay.classList.add("open");
   }
 
   close() {
     this.overlay.classList.remove("open");
+    this.editingProduct = null;
+  }
+
+  fillForm(product) {
+    this.inputs.title.value = product.title;
+    this.inputs.description.value = product.description;
+    this.inputs.brand.value = product.brand;
+    this.inputs.price.value = Math.round(product.price);
+    this.inputs.discountPercentage.value = Math.round(product.discountPercentage);
+    this.inputs.stock.value = product.stock;
   }
 
   async handleCreateProduct() {
@@ -179,8 +203,8 @@ export class AddProductModal {
       title: this.inputs.title.value.trim(),
       description: this.inputs.description.value.trim(),
       brand: this.inputs.brand.value.trim(),
-      price: Number(this.inputs.price.value),
-      discountPercentage: Number(this.inputs.discountPercentage.value) || 0,
+      price: Math.round(Number(this.inputs.price.value)),
+      discountPercentage: Math.round(Number(this.inputs.discountPercentage.value)) || 0,
       stock: Number(this.inputs.stock.value) || 0,
     };
 
@@ -197,7 +221,7 @@ export class AddProductModal {
     this.saveButton.disabled = true;
 
     try {
-      const success = await this.onSave?.(payload);
+      const success = await this.onSave?.(payload, this.editingProduct);
 
       if (success) {
         this.close();
@@ -205,7 +229,7 @@ export class AddProductModal {
       }
     } catch (error) {
       console.error(error);
-      this.showError("Failed to create product.");
+      this.showError("Failed to save product.");
     } finally {
       this.saveButton.disabled = false;
     }

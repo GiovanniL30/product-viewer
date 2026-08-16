@@ -26,7 +26,7 @@ export class Button {
   }
 
   setVariant(variant) {
-    this.element.classList.remove("btn-primary", "btn-secondary", "btn-icon");
+    this.element.classList.remove("btn-primary", "btn-secondary", "btn-icon", "btn-danger");
 
     this.element.classList.add(`btn-${variant}`);
   }

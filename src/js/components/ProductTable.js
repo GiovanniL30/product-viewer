@@ -3,9 +3,11 @@ import { Icon } from "./Icon.js";
 import { getDiscountedPrice, hasDiscount } from "../utils/productPrice.js";
 
 export class ProductTable {
-  constructor({ products = [], onView } = {}) {
+  constructor({ products = [], onView, onEdit, onDelete } = {}) {
     this.products = products;
     this.onView = onView;
+    this.onEdit = onEdit;
+    this.onDelete = onDelete;
 
     this.element = this.createElement();
   }
@@ -137,24 +139,45 @@ export class ProductTable {
     const td = document.createElement("td");
     td.classList.add("actions-cell");
 
+    td.append(
+      this.createActionButton({
+        src: "src/assets/icons/view.svg",
+        alt: "View product",
+        onClick: () => this.onView?.(product.id),
+      }),
+      this.createActionButton({
+        src: "src/assets/icons/edit.svg",
+        alt: "Edit product",
+        onClick: () => this.onEdit?.(product),
+      }),
+      this.createActionButton({
+        src: "src/assets/icons/delete.svg",
+        alt: "Delete product",
+        danger: true,
+        onClick: () => this.onDelete?.(product),
+      }),
+    );
+
+    return td;
+  }
+
+  createActionButton({ src, alt, danger = false, onClick }) {
     const button = new Button({
       type: "button",
       variant: "icon",
     });
 
-    button.addClass("action-btn", "action-btn-neutral");
+    button.addClass("action-btn", danger ? "action-btn-danger" : "action-btn-neutral");
 
     const icon = new Icon({
-      src: "src/assets/icons/view.svg",
-      alt: "View product",
+      src,
+      alt,
     });
 
     button.append(icon);
 
-    button.onClick(() => this.onView?.(product.id));
+    button.onClick(onClick);
 
-    td.append(button.element);
-
-    return td;
+    return button.element;
   }
 }

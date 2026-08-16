@@ -3,6 +3,7 @@ import { Button } from "../components/Button.js";
 import { Page } from "./Page.js";
 import { Icon } from "../components/Icon.js";
 import { AddProductModal } from "../components/AddProductModal.js";
+import { ConfirmModal } from "../components/ConfirmModal.js";
 import { ProductTable } from "../components/ProductTable.js";
 import { ProductCard } from "../components/ProductCard.js";
 
@@ -21,28 +22,38 @@ export class ProductsPage extends Page {
   paginationContainer;
   viewToggleContainer;
   addModal;
+  confirmModal;
 
   render() {
     const container = this.createContainer();
 
     this.addModal = this.createAddModal();
+    this.confirmModal = this.createConfirmModal();
 
     container.append(this.createHeader(), this.createContent());
 
-    this.container.append(container, this.addModal.element);
+    this.container.append(container, this.addModal.element, this.confirmModal.element);
 
     this.loadProducts();
   }
 
   createAddModal() {
     return new AddProductModal({
-      onSave: async (payload) => {
-        this.localProducts.unshift({
-          id: `local-${Date.now()}`,
-          ...payload,
-          thumbnail: "https://demofree.sirv.com/nope-not/here.jpg",
-          rating: 0,
-        });
+      onSave: async (payload, editingProduct) => {
+        if (editingProduct) {
+          const index = this.localProducts.findIndex((product) => product.id === editingProduct.id);
+
+          if (index !== -1) {
+            this.localProducts[index] = { ...this.localProducts[index], ...payload };
+          }
+        } else {
+          this.localProducts.unshift({
+            id: `local-${Date.now()}`,
+            ...payload,
+            thumbnail: "https://demofree.sirv.com/nope-not/here.jpg",
+            rating: 0,
+          });
+        }
 
         this.currentPage = 1;
 
@@ -174,30 +185,21 @@ export class ProductsPage extends Page {
   }
 
   async loadProducts() {
-    const skip = (this.currentPage - 1) * this.pageSize;
-
     this.setLoading(true);
 
     try {
-      const response = await this.api.getProducts({
-        limit: this.pageSize,
-        skip,
-        select: "id,title,description,brand,price,discountPercentage,rating,stock,thumbnail",
-      });
+      if (this.localProducts.length === 0) {
+        const response = await this.api.getProducts({
+          limit: 0,
+          select: "id,title,description,brand,price,discountPercentage,rating,stock,thumbnail",
+        });
 
-      const localProducts = this.currentPage === 1 ? this.localProducts : [];
-
-      this.total = response.total + localProducts.length;
-
-      const products = [...localProducts, ...response.products];
-
-      if (this.viewMode === "table") {
-        this.renderTable(products);
-        this.renderTablePagination();
-      } else {
-        this.renderCards(products);
-        this.renderLoadMore();
+        this.localProducts = response.products;
       }
+
+      this.total = this.localProducts.length;
+
+      this.renderCurrentPage();
     } catch (error) {
       console.error(error);
       this.renderError("Failed to load products.");
@@ -206,8 +208,33 @@ export class ProductsPage extends Page {
     }
   }
 
+  getPageProducts() {
+    const start = (this.currentPage - 1) * this.pageSize;
+
+    return this.localProducts.slice(start, start + this.pageSize);
+  }
+
+  renderCurrentPage() {
+    const products = this.getPageProducts();
+
+    if (this.viewMode === "table") {
+      this.renderTable(products);
+      this.renderTablePagination();
+    } else {
+      this.renderCards(products);
+      this.renderLoadMore();
+    }
+  }
+
   renderTable(products) {
-    this.tableContainer.replaceChildren(new ProductTable({ products, onView: (id) => this.viewProduct(id) }).element);
+    this.tableContainer.replaceChildren(
+      new ProductTable({
+        products,
+        onView: (id) => this.viewProduct(id),
+        onEdit: (product) => this.editProduct(product),
+        onDelete: (product) => this.deleteProduct(product),
+      }).element,
+    );
   }
 
   renderCards(products) {
@@ -216,12 +243,53 @@ export class ProductsPage extends Page {
     grid.classList.add("products-grid");
 
     products.forEach((product) => {
-      const card = new ProductCard({ product, onClick: () => this.viewProduct(product.id) });
-
-      grid.append(card.element);
+      grid.append(this.createCard(product).element);
     });
 
     this.tableContainer.replaceChildren(grid);
+  }
+
+  createCard(product) {
+    return new ProductCard({
+      product,
+      onClick: () => this.viewProduct(product.id),
+      onEdit: () => this.editProduct(product),
+      onDelete: () => this.deleteProduct(product),
+    });
+  }
+
+  editProduct(product) {
+    this.addModal?.open(product);
+  }
+
+  deleteProduct(product) {
+    this.pendingDeleteProduct = product;
+    this.confirmModal?.open();
+  }
+
+  createConfirmModal() {
+    return new ConfirmModal({
+      title: "Delete Product",
+      message: "Are you sure you want to delete this product? This action cannot be undone.",
+      confirmText: "Delete",
+      onConfirm: () => {
+        const product = this.pendingDeleteProduct;
+
+        if (!product) {
+          return;
+        }
+
+        this.pendingDeleteProduct = null;
+
+        this.localProducts = this.localProducts.filter((localProduct) => localProduct.id !== product.id);
+
+        if (this.getPageProducts().length === 0 && this.currentPage > 1) {
+          this.currentPage--;
+        }
+
+        this.loadProducts();
+      },
+    });
   }
 
   viewProduct(id) {
@@ -282,20 +350,6 @@ export class ProductsPage extends Page {
     return element;
   }
 
-  renderCards(products) {
-    const grid = document.createElement("div");
-
-    grid.classList.add("products-grid");
-
-    products.forEach((product) => {
-      const card = new ProductCard({ product, onClick: () => this.viewProduct(product.id) });
-
-      grid.append(card.element);
-    });
-
-    this.tableContainer.replaceChildren(grid);
-  }
-
   renderLoadMore() {
     this.paginationContainer.replaceChildren();
 
@@ -326,41 +380,20 @@ export class ProductsPage extends Page {
     button.onClick(() => {
       this.currentPage++;
 
-      this.loadMoreProducts();
+      this.appendCards();
     });
 
     this.paginationContainer.append(button.element);
   }
 
-  async loadMoreProducts() {
-    const skip = (this.currentPage - 1) * this.pageSize;
-
-    try {
-      const response = await this.api.getProducts({
-        limit: this.pageSize,
-        skip,
-      });
-
-      this.total = response.total;
-
-      this.appendCards(response.products);
-
-      this.renderLoadMore();
-    } catch (error) {
-      console.error(error);
-
-      this.renderError("Failed to load more products.");
-    }
-  }
-
-  appendCards(products) {
+  appendCards() {
     const grid = this.tableContainer.firstChild;
 
-    products.forEach((product) => {
-      const card = new ProductCard({ product, onClick: () => this.viewProduct(product.id) });
-
-      grid.append(card.element);
+    this.getPageProducts().forEach((product) => {
+      grid.append(this.createCard(product).element);
     });
+
+    this.renderLoadMore();
   }
 
   renderError(message) {

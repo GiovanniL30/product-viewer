@@ -1,9 +1,13 @@
 import { getDiscountedPrice, hasDiscount } from "../utils/productPrice.js";
+import { Button } from "./Button.js";
+import { Icon } from "./Icon.js";
 
 export class ProductCard {
-  constructor({ product, onClick } = {}) {
+  constructor({ product, onClick, onEdit, onDelete } = {}) {
     this.product = product;
     this.onClick = onClick;
+    this.onEdit = onEdit;
+    this.onDelete = onDelete;
 
     this.element = this.createElement();
   }
@@ -77,10 +81,38 @@ export class ProductCard {
     bodyElements.push(title, rating, description, priceRow);
 
     body.append(...bodyElements);
-    card.append(imageWrap, body);
+
+    const actions = this.createActions();
+
+    card.append(imageWrap, body, actions);
 
     card.addEventListener("click", () => this.onClick?.());
 
     return card;
+  }
+
+  createActions() {
+    const actions = document.createElement("div");
+    actions.classList.add("product-card-actions");
+
+    const edit = new Button({ type: "button", variant: "icon" });
+    edit.addClass("action-btn", "action-btn-neutral");
+    edit.append(new Icon({ src: "src/assets/icons/edit.svg", alt: "Edit product" }));
+    edit.onClick((event) => {
+      event.stopPropagation();
+      this.onEdit?.(this.product);
+    });
+
+    const del = new Button({ type: "button", variant: "icon" });
+    del.addClass("action-btn", "action-btn-danger");
+    del.append(new Icon({ src: "src/assets/icons/delete.svg", alt: "Delete product" }));
+    del.onClick((event) => {
+      event.stopPropagation();
+      this.onDelete?.(this.product);
+    });
+
+    actions.append(edit.element, del.element);
+
+    return actions;
   }
 }

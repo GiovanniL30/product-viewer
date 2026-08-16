@@ -37,6 +37,11 @@
   border: 1px solid var(--color-border);
 }
 
+.btn-danger {
+  background: var(--color-error);
+  color: white;
+}
+
 .btn-text {
   padding: 0;
 
